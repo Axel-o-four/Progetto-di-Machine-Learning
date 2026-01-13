@@ -138,48 +138,77 @@ print("="*70)
 
 # Store original class distribution before SMOTE
 y_train_before = y_train.copy()
+y_test_before = y_test.copy()
 X_train_before = X_train.copy()
+X_test_before = X_test.copy()
 
-# Apply SMOTE to training set only (test set remains unchanged)
+# Apply SMOTE to both training and test sets
 smote = SMOTE(random_state=42, k_neighbors=5, sampling_strategy=0.1)
 X_train_smote, y_train_smote = smote.fit_resample(X_train, y_train)
+X_test_smote, y_test_smote = smote.fit_resample(X_test, y_test)
 
-print(f"\nBefore SMOTE:")
+print(f"\nTraining Set - Before SMOTE:")
 print(f"  - Legitimate: {(y_train_before == 0).sum()} ({(y_train_before == 0).sum()/len(y_train_before)*100:.2f}%)")
 print(f"  - Fraudulent: {(y_train_before == 1).sum()} ({(y_train_before == 1).sum()/len(y_train_before)*100:.2f}%)")
 print(f"  - Total samples: {len(y_train_before)}")
 
-print(f"\nAfter SMOTE:")
+print(f"\nTraining Set - After SMOTE:")
 print(f"  - Legitimate: {(y_train_smote == 0).sum()} ({(y_train_smote == 0).sum()/len(y_train_smote)*100:.2f}%)")
 print(f"  - Fraudulent: {(y_train_smote == 1).sum()} ({(y_train_smote == 1).sum()/len(y_train_smote)*100:.2f}%)")
 print(f"  - Total samples: {len(y_train_smote)}")
 print(f"  - Synthetic samples added: {len(y_train_smote) - len(y_train_before)}")
 
-# Visualize class distribution before and after SMOTE
-fig, axes = plt.subplots(1, 2, figsize=(14, 5))
+print(f"\nTest Set - Before SMOTE:")
+print(f"  - Legitimate: {(y_test_before == 0).sum()} ({(y_test_before == 0).sum()/len(y_test_before)*100:.2f}%)")
+print(f"  - Fraudulent: {(y_test_before == 1).sum()} ({(y_test_before == 1).sum()/len(y_test_before)*100:.2f}%)")
+print(f"  - Total samples: {len(y_test_before)}")
 
-# Before SMOTE
-classes_before = y_train_before.value_counts().sort_index()
-axes[0].bar(['Legitimate (0)', 'Fraudulent (1)'], [classes_before[0], classes_before[1]], color=['skyblue', 'lightcoral'], edgecolor='black', linewidth=2)
-axes[0].set_title(f'Class Distribution - Before SMOTE\n(Ratio: {classes_before[0]/classes_before[1]:.1f}:1)', fontsize=12, fontweight='bold')
-axes[0].set_ylabel('Number of Samples')
-axes[0].grid(alpha=0.3, axis='y')
+print(f"\nTest Set - After SMOTE:")
+print(f"  - Legitimate: {(y_test_smote == 0).sum()} ({(y_test_smote == 0).sum()/len(y_test_smote)*100:.2f}%)")
+print(f"  - Fraudulent: {(y_test_smote == 1).sum()} ({(y_test_smote == 1).sum()/len(y_test_smote)*100:.2f}%)")
+print(f"  - Total samples: {len(y_test_smote)}")
+print(f"  - Synthetic samples added: {len(y_test_smote) - len(y_test_before)}")
 
-# After SMOTE
-classes_after = y_train_smote.value_counts().sort_index()
-axes[1].bar(['Legitimate (0)', 'Fraudulent (1)'], [classes_after[0], classes_after[1]], color=['skyblue', 'lightcoral'], edgecolor='black', linewidth=2)
-axes[1].set_title(f'Class Distribution - After SMOTE\n(Ratio: {classes_after[0]/classes_after[1]:.1f}:1)', fontsize=12, fontweight='bold')
-axes[1].set_ylabel('Number of Samples')
-axes[1].grid(alpha=0.3, axis='y')
+# Visualize class distribution before and after SMOTE (Training Set)
+fig, axes = plt.subplots(2, 2, figsize=(14, 10))
+
+# Training Set - Before SMOTE
+classes_train_before = y_train_before.value_counts().sort_index()
+axes[0, 0].bar(['Legitimate (0)', 'Fraudulent (1)'], [classes_train_before[0], classes_train_before[1]], color=['skyblue', 'lightcoral'], edgecolor='black', linewidth=2)
+axes[0, 0].set_title(f'Training Set - Before SMOTE\n(Ratio: {classes_train_before[0]/classes_train_before[1]:.1f}:1)', fontsize=12, fontweight='bold')
+axes[0, 0].set_ylabel('Number of Samples')
+axes[0, 0].grid(alpha=0.3, axis='y')
+
+# Training Set - After SMOTE
+classes_train_after = y_train_smote.value_counts().sort_index()
+axes[0, 1].bar(['Legitimate (0)', 'Fraudulent (1)'], [classes_train_after[0], classes_train_after[1]], color=['skyblue', 'lightcoral'], edgecolor='black', linewidth=2)
+axes[0, 1].set_title(f'Training Set - After SMOTE\n(Ratio: {classes_train_after[0]/classes_train_after[1]:.1f}:1)', fontsize=12, fontweight='bold')
+axes[0, 1].set_ylabel('Number of Samples')
+axes[0, 1].grid(alpha=0.3, axis='y')
+
+# Test Set - Before SMOTE
+classes_test_before = y_test_before.value_counts().sort_index()
+axes[1, 0].bar(['Legitimate (0)', 'Fraudulent (1)'], [classes_test_before[0], classes_test_before[1]], color=['skyblue', 'lightcoral'], edgecolor='black', linewidth=2)
+axes[1, 0].set_title(f'Test Set - Before SMOTE\n(Ratio: {classes_test_before[0]/classes_test_before[1]:.1f}:1)', fontsize=12, fontweight='bold')
+axes[1, 0].set_ylabel('Number of Samples')
+axes[1, 0].grid(alpha=0.3, axis='y')
+
+# Test Set - After SMOTE
+classes_test_after = y_test_smote.value_counts().sort_index()
+axes[1, 1].bar(['Legitimate (0)', 'Fraudulent (1)'], [classes_test_after[0], classes_test_after[1]], color=['skyblue', 'lightcoral'], edgecolor='black', linewidth=2)
+axes[1, 1].set_title(f'Test Set - After SMOTE\n(Ratio: {classes_test_after[0]/classes_test_after[1]:.1f}:1)', fontsize=12, fontweight='bold')
+axes[1, 1].set_ylabel('Number of Samples')
+axes[1, 1].grid(alpha=0.3, axis='y')
 
 plt.tight_layout()
 plt.savefig(os.path.join(output_folder, 'class_distribution_before_after_smote.png'), dpi=300, bbox_inches='tight')
 plt.close()
-print("\nVisualization saved: class_distribution_before_after_smote.png")
+print("\nVisualization saved: class_distribution_before_after_smote.png (4 plots: Train/Test x Before/After)")
 
-# Use SMOTE-balanced training data for model training
 X_train = X_train_smote
 y_train = y_train_smote
+X_test = X_test_smote
+y_test = y_test_smote
 
 # --- 6. SAVE PREPROCESSED DATA ---
 print("\n" + "="*70)
