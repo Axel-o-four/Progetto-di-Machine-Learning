@@ -195,7 +195,6 @@ if 'Class' in df.columns:
                      whiskerprops=dict(color='black'),
                      capprops=dict(color='black'))
     
-    # Color boxes with skyblue
     colors = ['skyblue', 'skyblue']
     for patch, color in zip(bp['boxes'], colors):
         patch.set_facecolor(color)
