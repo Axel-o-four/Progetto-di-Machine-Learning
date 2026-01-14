@@ -6,9 +6,7 @@ import warnings
 import joblib
 from sklearn.naive_bayes import GaussianNB
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import (classification_report, confusion_matrix, roc_auc_score, 
-                             roc_curve, auc, precision_recall_curve, f1_score, 
-                             precision_score, recall_score, accuracy_score)
+from sklearn.metrics import (classification_report, confusion_matrix, roc_auc_score, roc_curve, auc, f1_score, precision_score, recall_score, accuracy_score)
 import seaborn as sns
 
 warnings.simplefilter(action='ignore', category=FutureWarning)
@@ -20,32 +18,20 @@ if not os.path.exists(output_folder):
 
 preprocessing_folder = 'preprocessing_output'
 
-print("\n" + "="*70)
-print("MODEL TRAINING AND EVALUATION")
-print("="*70)
-
-# --- 1. LOAD PREPROCESSED DATA ---
-print("\n" + "="*70)
-print("1. LOADING PREPROCESSED DATA")
-print("="*70)
+# Load the dataset
 
 try:
     X_train = pd.read_csv(os.path.join(preprocessing_folder, 'X_train.csv'))
     X_test = pd.read_csv(os.path.join(preprocessing_folder, 'X_test.csv'))
     y_train = pd.read_csv(os.path.join(preprocessing_folder, 'y_train.csv')).values.ravel()
     y_test = pd.read_csv(os.path.join(preprocessing_folder, 'y_test.csv')).values.ravel()
-    
-    print(f"X_train: {X_train.shape}")
-    print(f"X_test: {X_test.shape}")
-    print(f"y_train: {y_train.shape} - Fraud: {(y_train == 1).sum()}, Legitimate: {(y_train == 0).sum()}")
-    print(f"y_test: {y_test.shape} - Fraud: {(y_test == 1).sum()}, Legitimate: {(y_test == 0).sum()}")
 except FileNotFoundError as e:
-    print(f"ERROR: {e}")
+    print(f"ERROR: preprocessed dataset file(s) not found. Please, run the preprocessing script again to proceed.")
     exit()
 
-# --- 2. TRAIN GAUSSIAN NAIVE BAYES ---
+# --- 1. TRAIN GAUSSIAN NAIVE BAYES ---
 print("\n" + "="*70)
-print("2. TRAINING GAUSSIAN NAIVE BAYES")
+print("TRAINING GAUSSIAN NAIVE BAYES")
 print("="*70)
 
 gnb = GaussianNB()
@@ -53,11 +39,11 @@ gnb.fit(X_train, y_train)
 y_pred_gnb = gnb.predict(X_test)
 y_pred_proba_gnb = gnb.predict_proba(X_test)[:, 1]
 
-print("Training complete")
+print("Training complete.")
 
-# --- 3. TRAIN RANDOM FOREST ---
+# --- 2. TRAIN RANDOM FOREST ---
 print("\n" + "="*70)
-print("3. TRAINING RANDOM FOREST")
+print("TRAINING RANDOM FOREST")
 print("="*70)
 
 rf = RandomForestClassifier(
@@ -73,13 +59,9 @@ rf.fit(X_train, y_train)
 y_pred_rf = rf.predict(X_test)
 y_pred_proba_rf = rf.predict_proba(X_test)[:, 1]
 
-print("Training complete")
+print("Training complete.")
 
-# --- 4. EVALUATE MODELS ---
-print("\n" + "="*70)
-print("4. MODEL EVALUATION")
-print("="*70)
-
+# --- 3. EVALUATE MODELS ---
 def print_metrics(model_name, y_true, y_pred, y_pred_proba):
     print(f"\n{model_name}:")
     print("-" * 50)
@@ -104,11 +86,7 @@ def print_metrics(model_name, y_true, y_pred, y_pred_proba):
 metrics_gnb = print_metrics('GAUSSIAN NAIVE BAYES', y_test, y_pred_gnb, y_pred_proba_gnb)
 metrics_rf = print_metrics('RANDOM FOREST', y_test, y_pred_rf, y_pred_proba_rf)
 
-# --- 5. MODEL COMPARISON ---
-print("\n" + "="*70)
-print("5. MODEL COMPARISON")
-print("="*70)
-
+# --- 4. MODEL COMPARISON ---
 comparison_df = pd.DataFrame({
     'Gaussian NB': metrics_gnb,
     'Random Forest': metrics_rf
@@ -129,11 +107,9 @@ plt.tight_layout()
 plt.savefig(os.path.join(output_folder, 'model_comparison.png'), dpi=300, bbox_inches='tight')
 plt.close()
 
-# --- 6. CONFUSION MATRICES ---
-print("\n" + "="*70)
-print("6. CONFUSION MATRICES")
-print("="*70)
+print("\nVisualization saved: model_comparison.png")
 
+# --- 5. CONFUSION MATRICES ---
 fig, axes = plt.subplots(1, 2, figsize=(14, 5))
 
 cm_gnb = confusion_matrix(y_test, y_pred_gnb)
@@ -158,13 +134,9 @@ plt.tight_layout()
 plt.savefig(os.path.join(output_folder, 'confusion_matrices.png'), dpi=300, bbox_inches='tight')
 plt.close()
 
-print("confusion_matrices.png")
+print("\nVisualization saved: confusion_matrices.png")
 
-# --- 7. ROC CURVES ---
-print("\n" + "="*70)
-print("7. ROC CURVES")
-print("="*70)
-
+# --- 6. ROC CURVES ---
 fpr_gnb, tpr_gnb, _ = roc_curve(y_test, y_pred_proba_gnb)
 roc_auc_gnb = auc(fpr_gnb, tpr_gnb)
 
@@ -184,18 +156,14 @@ plt.tight_layout()
 plt.savefig(os.path.join(output_folder, 'roc_curves.png'), dpi=300, bbox_inches='tight')
 plt.close()
 
-print("roc_curves.png")
+print("\nVisualization saved: roc_curves.png")
 
-# --- 8. SAVE MODELS AND EVALUATION REPORT ---
-print("\n" + "="*70)
-print("8. SAVING MODELS AND EVALUATION REPORT")
-print("="*70)
-
+# --- 7. SAVE MODELS AND EVALUATION REPORT ---
 joblib.dump(gnb, os.path.join(output_folder, 'gaussian_nb_model.pkl'))
 joblib.dump(rf, os.path.join(output_folder, 'random_forest_model.pkl'))
 
-print("gaussian_nb_model.pkl")
-print("random_forest_model.pkl")
+print("\nModel saved: gaussian_nb_model.pkl")
+print("\nModel saved: random_forest_model.pkl")
 
 report_text = f"""
 {'='*70}
@@ -236,4 +204,4 @@ Configuration:
 with open(os.path.join(output_folder, 'training_report.txt'), 'w') as f:
     f.write(report_text)
 
-print(f"All outputs saved to: {output_folder}")
+print(f"Training complete! Results saved to 'models_output' folder.")

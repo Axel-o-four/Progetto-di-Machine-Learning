@@ -6,7 +6,6 @@ import warnings
 import numpy as np
 from scipy import stats
 
-# Suppress future warnings for cleaner output
 warnings.simplefilter(action='ignore', category=FutureWarning)
 
 # --- 0. SETUP ---
@@ -23,12 +22,12 @@ except FileNotFoundError:
 
 # --- 1. DATASET OVERVIEW ---
 print("\n" + "="*70)
-print("DATASET OVERVIEW")
+print("DATASET ANALYSIS")
 print("="*70)
+
 print(f"Dataset Shape: {df.shape[0]} rows, {df.shape[1]} columns")
 print(f"\nData Types:\n{df.dtypes}")
 print(f"\nMissing Values:\n{df.isnull().sum()}")
-print(f"\nMemory Usage: {df.memory_usage(deep=True).sum() / 1024**2:.2f} MB")
 
 # --- 2. DATASET ANALYSIS ---
 results = []
@@ -51,7 +50,7 @@ for col in features_to_analyze:
         'Statistics': summary
     })
     
-    # Create histogram
+    # Create histogram for single feature
     plt.figure(figsize=(10, 6))
     sns.histplot(data=df, x=col, kde=True, bins=30, color='skyblue', edgecolor='black')
     plt.title(f'Distribution of {col}', fontsize=14, fontweight='bold')
@@ -60,8 +59,9 @@ for col in features_to_analyze:
     plt.grid(alpha=0.3)
     plot_path = os.path.join(output_folder, f'distribution_{col}.png')
     plt.savefig(plot_path, dpi=300, bbox_inches='tight')
+    print(f"Visualization saved for '{col}'.")
     plt.close()
-    print(f"Distribution graph for '{col}' saved.")
+
 
 # Combined histogram for V1 to V28 features
 v_features = [f'V{j}' for j in range(1, 29)]
@@ -82,13 +82,12 @@ for i, col in enumerate(v_features):
 plt.tight_layout()
 v_combined_path = os.path.join(output_folder, 'distribution_V1-28_combined.png')
 plt.savefig(v_combined_path, dpi=300, bbox_inches='tight')
+print("Visualization saved: distribution_V1-28_combined.png")
 plt.close()
-print(f"Combined histogram for V1-V28 features saved.")
 
-# Create summary DataFrame
 summary_df = pd.DataFrame(results)
 
-# --- 3. SAVE SUMMARY TABLE AS IMAGE ---
+# --- 3. SUMMARY TABLE ---
 fig, ax = plt.subplots(figsize=(16, max(12, len(summary_df) * 0.5)))
 ax.axis('tight')
 ax.axis('off')
@@ -112,12 +111,8 @@ for (row, col), cell in the_table.get_celld().items():
 fig.text(0.5, 0.02, f'Total Samples: {len(df):,}', ha='center', fontsize=12, fontweight='bold')
 
 output_path = os.path.join(output_folder, 'statistical_summary.png')
-try:
-    plt.savefig(output_path, bbox_inches='tight', dpi=200, pad_inches=0.4)
-    print(f"\nSummary table saved as image: {output_path}")
-except Exception as e:
-    print(f"Error saving summary table: {e}")
-
+plt.savefig(output_path, bbox_inches='tight', dpi=200, pad_inches=0.4)
+print("Visualization saved: statistical_summary.png")
 plt.close()
 
 # --- 4. CLASS DISTRIBUTION TABLE ---
@@ -157,18 +152,12 @@ if 'Class' in df.columns:
     fig.text(0.5, 0.02, f'Total Samples: {len(df):,}', ha='center', fontsize=10, fontweight='bold')
     
     class_output_path = os.path.join(output_folder, 'class_balance.png')
-    try:
-        plt.savefig(class_output_path, bbox_inches='tight', dpi=200, pad_inches=0.4)
-        print(f"Class distribution table saved as image: {class_output_path}")
-    except Exception as e:
-        print(f"Error saving class distribution table: {e}")
-    
+    plt.savefig(class_output_path, bbox_inches='tight', dpi=200, pad_inches=0.4)
+    print("Visualization saved: class_balance.png")
     plt.close()
 
 # --- 5. BOXPLOT ANALYSIS ---
-print("\nGenerating boxplot visualizations...")
-
-# 5.1 Boxplot for Amount
+# Boxplot for Amount
 plt.figure(figsize=(10, 6))
 plt.boxplot(df['Amount'], vert=True, patch_artist=True, 
             boxprops=dict(facecolor='skyblue', color='black'),
@@ -180,20 +169,22 @@ plt.ylabel('Amount', fontsize=12)
 plt.grid(alpha=0.3, axis='y')
 boxplot_amount_path = os.path.join(output_folder, 'boxplot_amount.png')
 plt.savefig(boxplot_amount_path, dpi=300, bbox_inches='tight')
+print("Visualization saved: boxplot_amount.png")
 plt.close()
-print(f"Boxplot for Amount saved.")
 
-# 5.2 Boxplot for Amount by Class
+# Boxplot for Amount by Class
 if 'Class' in df.columns:
     plt.figure(figsize=(10, 6))
     class_labels = {0: 'Legitimate', 1: 'Fraudulent'}
     
     data_to_plot = [df[df['Class'] == 0]['Amount'], df[df['Class'] == 1]['Amount']]
-    bp = plt.boxplot(data_to_plot, labels=['Legitimate', 'Fraudulent'], patch_artist=True,
+    bp = plt.boxplot(data_to_plot, patch_artist=True,
                      boxprops=dict(facecolor='skyblue', color='black'),
                      medianprops=dict(color='skyblue', linewidth=2),
                      whiskerprops=dict(color='black'),
                      capprops=dict(color='black'))
+    
+    plt.xticks([1, 2], ['Legitimate', 'Fraudulent'])
     
     colors = ['skyblue', 'skyblue']
     for patch, color in zip(bp['boxes'], colors):
@@ -204,9 +195,9 @@ if 'Class' in df.columns:
     plt.grid(alpha=0.3, axis='y')
     boxplot_class_path = os.path.join(output_folder, 'boxplot_amount_by_class.png')
     plt.savefig(boxplot_class_path, dpi=300, bbox_inches='tight')
+    print("Visualization saved: boxplot_amount_by_class.png")
     plt.close()
-    print(f"Boxplot for Amount by Class saved.")
 
 print("\n" + "="*70)
-print("Analysis complete! All results saved to the 'analysis_output' folder.")
+print("Analysis complete! Results saved to 'analysis_output' folder.")
 print("="*70)
