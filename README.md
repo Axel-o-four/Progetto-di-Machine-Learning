@@ -22,7 +22,7 @@ Il progetto dovrà essere consegnato tramite il link messo a disposizione sulla 
 
 _N.B.: I risultati del progetto dovranno essere presentati nelle sessioni di discussione attraverso una presentazione (Power Point, Google Slides, ecc.)._
 
-## Dataset del progetto
+## Dataset
 Il dataset utilizzato è Credit Card Fraud Detection di Machine Learning Group of Université Libre de Bruxelles, disponibile su Kaggle (https://www.kaggle.com/datasets/mlg-ulb/creditcardfraud).
 
 ## Componenti del progetto
@@ -32,3 +32,13 @@ All'interno della cartella di progetto sono disponibili:
 - `analysis_output` cartella generata da `data_analysis.py` contenente il risultato dell'analisi del dataset;
 - `preprocessing.py` contiene le operazioni di pre-processing e il feature engineering;
 - `preprocessing_output` cartella generata da `data_analysis.py` contenente il risultato delle operazioni di pre-processing e di feature engineering;
+- `model_training.py` contiene le operazioni di addestramento dei modelli Gaussian Naïve Bayes e Random Forest, con l'analisi e il paragone delle performance;
+- `models_output` cartella generata da `model_training.py` contenente il risultato delle operazioni di training.
+
+## Documentazioni disponibili
+All'interno della cartella di progetto sono disponibili:
+
+- `Documentazione.pages` documentazione testuale del progetto in formato Apple Pages;
+- `Documentazione.pdf` documentazione testuale del progetto in formato Portable Document Format;
+- `Presentazione.key` presentazione del progetto in formato Apple Keynote;
+- `Presentazione.pdf` presentazione del progetto in formato Portable Document Format.
