@@ -7,7 +7,9 @@ import joblib
 from sklearn.naive_bayes import GaussianNB
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import (classification_report, confusion_matrix, roc_auc_score, roc_curve, auc, f1_score, precision_score, recall_score, accuracy_score)
+from sklearn.model_selection import GridSearchCV
 import seaborn as sns
+from tqdm import tqdm
 
 warnings.simplefilter(action='ignore', category=FutureWarning)
 
@@ -46,16 +48,47 @@ print("\n" + "="*70)
 print("TRAINING RANDOM FOREST")
 print("="*70)
 
-rf = RandomForestClassifier(
-    n_estimators=100,
-    max_depth=15,
-    min_samples_split=10,
-    min_samples_leaf=5,
-    random_state=42,
-    n_jobs=-1,
-    class_weight='balanced'
+param_grid = {
+    'n_estimators': [50, 100, 150],
+    'max_depth': [10, 15, 20],
+    'min_samples_split': [5, 10, 15],
+    'min_samples_leaf': [2, 5, 10],
+    'class_weight': ['balanced']
+}
+
+total_combinations = 1
+for values in param_grid.values():
+    total_combinations *= len(values)
+cv_folds = 5
+total_fits = total_combinations * cv_folds
+
+print(f"\nHyperparameter Tuning Configuration:")
+print(f"  - Parameter combinations: {total_combinations}")
+print(f"  - Cross-validation folds: {cv_folds}")
+print(f"  - Total model fits: {total_fits}")
+print(f"\nStarting GridSearchCV...\n")
+
+rf_base = RandomForestClassifier(random_state=42, n_jobs=-1)
+grid_search = GridSearchCV(
+    rf_base, 
+    param_grid, 
+    cv=5, 
+    scoring='f1', 
+    n_jobs=-1, 
+    verbose=2
 )
-rf.fit(X_train, y_train)
+
+grid_search.fit(X_train, y_train)
+print("\n")
+
+rf = grid_search.best_estimator_
+best_params = grid_search.best_params_
+
+print(f"\nBest parameters found:")
+for param, value in best_params.items():
+    print(f"  - {param}: {value}")
+print(f"\nBest CV F1-Score: {grid_search.best_score_:.4f}")
+
 y_pred_rf = rf.predict(X_test)
 y_pred_proba_rf = rf.predict_proba(X_test)[:, 1]
 
@@ -193,12 +226,14 @@ Recall:    {metrics_rf['Recall']:.4f}
 F1-Score:  {metrics_rf['F1-Score']:.4f}
 ROC-AUC:   {metrics_rf['ROC-AUC']:.4f}
 
-Configuration:
-- n_estimators: {rf.n_estimators}
-- max_depth: {rf.max_depth}
-- min_samples_split: {rf.min_samples_split}
-- min_samples_leaf: {rf.min_samples_leaf}
-- class_weight: balanced
+Hyperparameter Tuning (GridSearchCV with 5-fold CV):
+Best CV F1-Score: {grid_search.best_score_:.4f}
+Best Parameters:
+- n_estimators: {best_params['n_estimators']}
+- max_depth: {best_params['max_depth']}
+- min_samples_split: {best_params['min_samples_split']}
+- min_samples_leaf: {best_params['min_samples_leaf']}
+- class_weight: {best_params['class_weight']}
 """
 
 with open(os.path.join(output_folder, 'training_report.txt'), 'w') as f:
